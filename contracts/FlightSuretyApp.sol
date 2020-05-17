@@ -77,6 +77,8 @@ contract FlightSuretyApp {
                                 public 
     {
         contractOwner = msg.sender;
+        
+        // Todo Adresse zum Data-Contract übergeben und merken
     }
 
     /********************************************************************************************/
@@ -121,7 +123,7 @@ contract FlightSuretyApp {
                                 external
                                 pure
     {
-
+        // not needed for requirements
     }
     
    /**

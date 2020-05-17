@@ -15,6 +15,7 @@ flightSuretyApp.events.OracleRequest({
   }, function (error, event) {
     if (error) console.log(error)
     console.log(event)
+    // ToDo Logik: Oracle Register, Update State, Oracle Answer (flight is late or not) by push transaction to flight contract
 });
 
 const app = express();
@@ -22,6 +23,7 @@ app.get('/api', (req, res) => {
     res.send({
       message: 'An API for use with your Dapp!'
     })
+    // possible endpoint for persisting flights (for flight dropdown in ui), not needed for requirements
 })
 
 export default app;
