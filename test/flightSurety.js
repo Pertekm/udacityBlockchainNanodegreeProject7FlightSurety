@@ -59,7 +59,7 @@ contract('Flight Surety Tests', async (accounts) => {
       let reverted = false;
       try 
       {
-          await config.flightSurety.setTestingMode(true);
+          await config.flightSuretyData.pay(); // Any function with requireIsOperational  //setTestingMode(true);
       }
       catch(e) {
           reverted = true;
@@ -81,14 +81,28 @@ contract('Flight Surety Tests', async (accounts) => {
         await config.flightSuretyApp.registerAirline(newAirline, {from: config.firstAirline});
     }
     catch(e) {
-
+      assert.isTrue(true, "revert exception required");
     }
-    let result = await config.flightSuretyData.isAirline.call(newAirline); 
+    let result = await config.flightSuretyApp.isAirline.call(newAirline); 
 
     // ASSERT
     assert.equal(result, false, "Airline should not be able to register another airline if it hasn't provided funding");
 
   });
  
+
+  it('(owner) can register an Airline using registerAirline()', async () => {
+    
+    // ARRANGE
+    let newAirline = accounts[3];
+
+    // ACT
+    await config.flightSuretyApp.registerAirline(newAirline, {from: config.owner});
+    let result = await config.flightSuretyApp.isAirline.call(newAirline); 
+
+    // ASSERT
+    assert.equal(result, true, "Owner should be able to register another airline");
+
+  });
 
 });
