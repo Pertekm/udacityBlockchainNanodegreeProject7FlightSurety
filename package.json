@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "scrypt": "^6.0.3",
+    "solc": "^0.4.25",
     "web3-provider-engine": "^15.0.0"
   }
 }
