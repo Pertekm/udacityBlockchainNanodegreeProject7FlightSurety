@@ -99,6 +99,7 @@ contract FlightSuretyApp {
         returns (bool success, uint256 votes)
     {
         flightSuretyData.registerAirline(newAirlineAddress, msg.sender); // keep origin sender, so it does not change to FlightSuretyApp
+        // ToDo: use .sender() instead of manual parameter? like .value
 
         success = flightSuretyData.isAirline(newAirlineAddress);
 
@@ -111,11 +112,18 @@ contract FlightSuretyApp {
         return flightSuretyData.isAirline(checkAddress);
     }
 
+    function buyInsurance(
+        address airline,
+        string flight,
+        uint256 timestamp
+    ) external payable {
+        flightSuretyData.buyInsurance.value(msg.value)(airline, flight, timestamp); // pass origin value
+    }
+
     /**
      * @dev Register a future flight for insuring.
      *
      */
-
     function registerFlight() external pure {
         // not needed for requirements
     }
@@ -270,11 +278,11 @@ contract FlightSuretyApp {
         }
     }
 
-    function getFlightKey(address airline, string flight, uint256 timestamp)
-        internal
-        pure
-        returns (bytes32)
-    {
+    function getFlightKey(
+        address airline,
+        string flight,
+        uint256 timestamp
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
 
@@ -330,4 +338,10 @@ contract FlightSuretyDataInterface {
     function isAirline(address checkAddress) external returns (bool);
 
     function getAirlineVotes(address airlineAddress) external returns (uint256);
+
+    function buyInsurance(
+        address airline,
+        string flight,
+        uint256 timestamp
+    ) external payable;
 }

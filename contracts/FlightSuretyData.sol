@@ -106,8 +106,13 @@ contract FlightSuretyData {
      * @dev Buy insurance for a flight
      *
      */
-
-    function buy() external payable requireIsOperational {}
+    function buyInsurance(
+        address airline,
+        string flight,
+        uint256 timestamp
+    ) external payable requireIsOperational {
+        require(msg.value > 1, "Not enough money given");
+    }
 
     /**
      *  @dev Credits payouts to insurees
