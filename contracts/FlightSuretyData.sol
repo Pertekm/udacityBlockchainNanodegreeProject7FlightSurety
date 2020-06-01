@@ -19,6 +19,14 @@ contract FlightSuretyData {
     bool private operational = true; // Blocks all state changes throughout the contract if false
     mapping(address => AirlineStatus) airlineStatus;
 
+    struct Flight {
+        bool isRegistered;
+        uint8 statusCode;
+        uint256 updatedTimestamp;
+        address airline;
+    }
+    mapping(bytes32 => Flight) private flights;
+
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -112,6 +120,7 @@ contract FlightSuretyData {
         uint256 timestamp
     ) external payable requireIsOperational {
         require(msg.value > 1, "Not enough money given");
+        require(isAirline(airline), "Airline is not registered");
     }
 
     /**
@@ -140,7 +149,9 @@ contract FlightSuretyData {
         return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
 
-    function authorizeCaller(address callerAddress) {}
+    function authorizeCaller(address callerAddress) {
+        // implementation not required for project
+    }
 
     function isAirline(address checkAddress) returns (bool) {
         return airlineStatus[checkAddress].isRegistered;

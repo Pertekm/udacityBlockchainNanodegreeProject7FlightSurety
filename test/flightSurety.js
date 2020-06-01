@@ -14,6 +14,14 @@ contract('Flight Surety Tests', async (accounts) => {
   /* Operations and Settings                                                              */
   /****************************************************************************************/
 
+  it(`first airline is registered automatic`, async function () {
+
+    let result = await config.flightSuretyApp.isAirline.call(config.firstAirline);
+
+    // ASSERT
+    assert.equal(result, true, "Airline should be registered");
+  });
+
   it(`(multiparty) has correct initial isOperational() value`, async function () {
 
     // Get operating status
@@ -102,31 +110,41 @@ contract('Flight Surety Tests', async (accounts) => {
 
   });
 
-  it('(passanger) can buy insurance using buyInsurance()', async () => {
+  it('(passenger) can buy insurance using buyInsurance()', async () => {
 
     // ARRANGE
-    let newAirline = accounts[3];
+    let airline = config.firstAirline;
+    let flight = "dummy";
+    let timestamp = Math.floor(Date.now() / 1000);
+    let passenger = accounts[4];
+    let minMoney = 2;
 
     // ACT
-    await config.flightSuretyApp.buyInsurance(airline, flight, timestap, { from: passenger, value: minMoney });
+    await config.flightSuretyApp.buyInsurance(airline, flight, timestamp, { from: passenger, value: minMoney });
 
     // ASSERT
     assert.equal(true, true, "bla bla");
 
   });
 
-  it('(passanger) can not buy insurance using buyInsurance() if too little money', async () => {
+  it('(passenger) can not buy insurance using buyInsurance() if too little money', async () => {
 
     // ARRANGE
-    let newAirline = accounts[3];
+    let airline = config.firstAirline;
+    let flight = "dummy";
+    let timestamp = Math.floor(Date.now() / 1000);
+    let passenger = accounts[4];
+    let tooLittleMoney = 1;
 
     // ACT
     try {
-      await config.flightSuretyApp.buyInsurance(airline, flight, timestap, { from: passenger, value: tooLittleMoney });
+      await config.flightSuretyApp.buyInsurance(airline, flight, timestamp, { from: passenger, value: tooLittleMoney });
+      
+      assert.equal(true, false, "Should not reach here because exception is expected");
     }
     catch (e) {
       // ASSERT
-      assert.isTrue(true, "revert exception required");
+      assert.equal(e.reason, "Not enough money given", "expect exception because of money needed");
     }
 
   });

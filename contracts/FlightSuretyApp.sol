@@ -27,13 +27,13 @@ contract FlightSuretyApp {
 
     address private contractOwner; // Account used to deploy contract
 
+    // Flight struct must equal the struct in contracts\FlightSuretyData.sol
     struct Flight {
         bool isRegistered;
         uint8 statusCode;
         uint256 updatedTimestamp;
         address airline;
     }
-    mapping(bytes32 => Flight) private flights;
 
     FlightSuretyDataInterface flightSuretyData;
 
@@ -71,10 +71,13 @@ contract FlightSuretyApp {
      * @dev Contract constructor
      *
      */
-    constructor(address flightSuretyDataAddress) public {
+    constructor(address flightSuretyDataAddress, address firstAirline) public {
         contractOwner = msg.sender;
 
         flightSuretyData = FlightSuretyDataInterface(flightSuretyDataAddress);
+
+        // Requirement: First airline is registered when contract is deployed. (cannot call this.registerAirline in constructor)
+        flightSuretyData.registerAirline(firstAirline, msg.sender); // keep origin sender, so it does not change to FlightSuretyApp
     }
 
     /********************************************************************************************/
