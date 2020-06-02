@@ -78,8 +78,13 @@ contract FlightSuretyApp {
 
         // Requirement: First airline is registered when contract is deployed. (cannot call this.registerAirline in constructor)
         flightSuretyData.registerAirline(firstAirline, msg.sender); // keep origin sender, so it does not change to FlightSuretyApp
-    }
 
+        // predefined Flights (so no GUI is neccessary to define)
+        flightSuretyData.registerFlight(firstAirline, "F1", 1591128835); // 06/02/2020 @ 8:13pm (UTC)
+        flightSuretyData.registerFlight(firstAirline, "F2", now + 1 days);
+        flightSuretyData.registerFlight(firstAirline, "F3", now + 3 days);
+    }
+    
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -104,7 +109,7 @@ contract FlightSuretyApp {
         flightSuretyData.registerAirline(newAirlineAddress, msg.sender); // keep origin sender, so it does not change to FlightSuretyApp
         // ToDo: use .sender() instead of manual parameter? like .value
 
-        success = flightSuretyData.isAirline(newAirlineAddress);
+        success = flightSuretyData.isAirlineRegistered(newAirlineAddress);
 
         //votes = flightSuretyData.getAirlineVotes(newAirlineAddress);
 
@@ -112,7 +117,7 @@ contract FlightSuretyApp {
     }
 
     function isAirline(address checkAddress) external returns (bool) {
-        return flightSuretyData.isAirline(checkAddress);
+        return flightSuretyData.isAirlineRegistered(checkAddress);
     }
 
     function buyInsurance(
@@ -338,7 +343,9 @@ contract FlightSuretyDataInterface {
         address currentAirlineAddress
     ) external;
 
-    function isAirline(address checkAddress) external returns (bool);
+    function registerFlight(address airline, string flightId, uint256 timestamp) external;
+
+    function isAirlineRegistered(address checkAddress) external view returns (bool);
 
     function getAirlineVotes(address airlineAddress) external returns (uint256);
 

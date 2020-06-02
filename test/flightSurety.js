@@ -114,8 +114,8 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // ARRANGE
     let airline = config.firstAirline;
-    let flight = "dummy";
-    let timestamp = Math.floor(Date.now() / 1000);
+    let flight = "F1";
+    let timestamp = 1591128835; // 06/02/2020 @ 8:13pm (UTC) --> ToDo verlagern in config unter predifined flights
     let passenger = accounts[4];
     let minMoney = 2;
 

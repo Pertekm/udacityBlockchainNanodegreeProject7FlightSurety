@@ -116,11 +116,15 @@ contract FlightSuretyData {
      */
     function buyInsurance(
         address airline,
-        string flight,
+        string flightId,
         uint256 timestamp
     ) external payable requireIsOperational {
         require(msg.value > 1, "Not enough money given");
-        require(isAirline(airline), "Airline is not registered");
+        require(this.isAirlineRegistered(airline), "Airline is not registered");
+        require(
+            this.isFlightRegistered(airline, flightId, timestamp),
+            "Flight is not registered"
+        );
     }
 
     /**
@@ -143,18 +147,45 @@ contract FlightSuretyData {
 
     function getFlightKey(
         address airline,
-        string memory flight,
+        string flightId,
         uint256 timestamp
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
+        return keccak256(abi.encodePacked(airline, flightId, timestamp));
     }
 
     function authorizeCaller(address callerAddress) {
         // implementation not required for project
     }
 
-    function isAirline(address checkAddress) returns (bool) {
+    function isAirlineRegistered(address checkAddress) external view returns (bool) {
         return airlineStatus[checkAddress].isRegistered;
+    }
+
+    function registerFlight(
+        address airline,
+        string flightId,
+        uint256 timestamp
+    ) external {
+        Flight memory flight;
+
+        flight.isRegistered = true;
+        flight.statusCode = 0; // for unknown (see app)
+        flight.updatedTimestamp = 0; // not yet updated by oracle
+        flight.airline = airline;
+
+        bytes32 flightKey = getFlightKey(airline, flightId, timestamp);
+
+        flights[flightKey] = flight;
+    }
+
+    function isFlightRegistered(
+        address airline,
+        string flightId,
+        uint256 timestamp
+    ) external view returns (bool) {
+        bytes32 flightKey = getFlightKey(airline, flightId, timestamp);
+
+        return flights[flightKey].isRegistered;
     }
 
     /**
