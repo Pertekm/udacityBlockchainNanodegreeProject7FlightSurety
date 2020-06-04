@@ -19,13 +19,17 @@ var Config = async function(accounts) {
         "0x2f2899d6d35b1a48a4fbdc93a37a72f264a9fca7"
     ];
 
-
     let owner = accounts[0];
     let firstAirline = accounts[1];
 
     let flightSuretyData = await FlightSuretyData.new();
     let flightSuretyApp = await FlightSuretyApp.new(FlightSuretyData.address, firstAirline);
 
+    let flightSample = {
+        airline: firstAirline,
+        flightId: "F1",
+        timestamp: 1591128835 // 06/02/2020 @ 8:13pm (UTC)        
+    };
     
     return {
         owner: owner,
@@ -33,7 +37,8 @@ var Config = async function(accounts) {
         weiMultiple: (new BigNumber(10)).pow(18),
         testAddresses: testAddresses,
         flightSuretyData: flightSuretyData,
-        flightSuretyApp: flightSuretyApp
+        flightSuretyApp: flightSuretyApp,
+        flightSample: flightSample
     }
 }
 

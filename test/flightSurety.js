@@ -71,7 +71,7 @@ contract('Flight Surety Tests', async (accounts) => {
     }
     assert.equal(reverted, true, "Access not blocked for requireIsOperational");
 
-    // Set it back for other tests to work
+    // Set it back for other tests to work (alternative use before function)
     await config.flightSuretyData.setOperatingStatus(true);
 
   });
@@ -113,14 +113,14 @@ contract('Flight Surety Tests', async (accounts) => {
   it('(passenger) can buy insurance using buyInsurance()', async () => {
 
     // ARRANGE
-    let airline = config.firstAirline;
-    let flight = "F1";
-    let timestamp = 1591128835; // 06/02/2020 @ 8:13pm (UTC) --> ToDo verlagern in config unter predifined flights
+    let airline = config.flightSample.airline;
+    let flightId = config.flightSample.flightId;
+    let timestamp = config.flightSample.timestamp;
     let passenger = accounts[4];
     let minMoney = 2;
 
     // ACT
-    await config.flightSuretyApp.buyInsurance(airline, flight, timestamp, { from: passenger, value: minMoney });
+    await config.flightSuretyApp.buyInsurance(airline, flightId, timestamp, { from: passenger, value: minMoney });
 
     // ASSERT
     assert.equal(true, true, "bla bla");
@@ -130,15 +130,15 @@ contract('Flight Surety Tests', async (accounts) => {
   it('(passenger) can not buy insurance using buyInsurance() if too little money', async () => {
 
     // ARRANGE
-    let airline = config.firstAirline;
-    let flight = "dummy";
-    let timestamp = Math.floor(Date.now() / 1000);
+    let airline = config.flightSample.airline;
+    let flightId = config.flightSample.flightId;
+    let timestamp = config.flightSample.timestamp;
     let passenger = accounts[4];
     let tooLittleMoney = 1;
 
     // ACT
     try {
-      await config.flightSuretyApp.buyInsurance(airline, flight, timestamp, { from: passenger, value: tooLittleMoney });
+      await config.flightSuretyApp.buyInsurance(airline, flightId, timestamp, { from: passenger, value: tooLittleMoney });
       
       assert.equal(true, false, "Should not reach here because exception is expected");
     }

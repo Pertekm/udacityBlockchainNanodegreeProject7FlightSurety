@@ -77,6 +77,10 @@ contract FlightSuretyApp {
         flightSuretyData = FlightSuretyDataInterface(flightSuretyDataAddress);
 
         // Requirement: First airline is registered when contract is deployed. (cannot call this.registerAirline in constructor)
+        log1(
+            bytes32("first airline registered:"),
+            bytes32(firstAirline)
+        ); 
         flightSuretyData.registerAirline(firstAirline, msg.sender); // keep origin sender, so it does not change to FlightSuretyApp
 
         // predefined Flights (so no GUI is neccessary to define)
@@ -107,7 +111,6 @@ contract FlightSuretyApp {
         returns (bool success, uint256 votes)
     {
         flightSuretyData.registerAirline(newAirlineAddress, msg.sender); // keep origin sender, so it does not change to FlightSuretyApp
-        // ToDo: use .sender() instead of manual parameter? like .value
 
         success = flightSuretyData.isAirlineRegistered(newAirlineAddress);
 
@@ -116,7 +119,7 @@ contract FlightSuretyApp {
         return (success, votes);
     }
 
-    function isAirline(address checkAddress) external returns (bool) {
+    function isAirline(address checkAddress) external view returns (bool) {
         return flightSuretyData.isAirlineRegistered(checkAddress);
     }
 

@@ -26,13 +26,23 @@
 
         <h2>Purchase insurance</h2>
         <div class="row top-20">
-            <label class="form">Flight</label> <input type="text" id="flight-number-insurance">
+            <p>
+            <label class="form">Flight</label> <input type="text" id="flight-id-insurance" value="F1">
+            <label class="form">Airline</label> <input type="text" id="airline-insurance" value="wurst">
+            <label class="form">Timestamp</label> <input type="text" id="timestamp-insurance" value="1591128835">
+            <br/>
+            <label class="form">Money</label> <input type="number" id="money-insurance" value="1">
+            <br/>
+            <br/>
             <btn class="btn btn-primary" id="purchase-insurance">Purchase insurance for flight</btn>
+            </p>
         </div>
 
         <h2>Check flight status</h2>
         <div class="row top-20">
-            <label class="form">Flight</label> <input type="text" id="flight-number-status">
+            <label class="form">Flight</label> <input type="text" id="flight-id-status" value="F1">
+            <label class="form">Airline</label> <input type="text" id="airline-status" value="0x4fB80A719fFC84705a12a9e4e7d9B92977D2b141">
+            <label class="form">Timestamp</label> <input type="text" id="timestamp-status" value="1591128835">
             <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
         </div>
     </main>
