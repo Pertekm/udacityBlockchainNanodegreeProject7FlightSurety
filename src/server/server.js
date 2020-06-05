@@ -13,7 +13,8 @@ let flightSuretyApp = new web3.eth.Contract(FlightSuretyApp.abi, config.appAddre
 flightSuretyApp.events.OracleRequest({
     fromBlock: 0
   }, function (error, event) {
-    if (error) console.log(error)
+    console.log("OracleRequest: ")
+    if (error) console.log("error: " + error)
     console.log(event)
     // ToDo Logik: Oracle Register, Update State, Oracle Answer (flight is late or not) by push transaction to flight contract
 });

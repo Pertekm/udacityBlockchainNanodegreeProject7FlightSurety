@@ -59,8 +59,8 @@ contract FlightSuretyData {
     /**
      * @dev Modifier that requires the "ContractOwner" account to be the function caller
      */
-    modifier requireContractOwner() {
-        require(msg.sender == contractOwner, "Caller is not contract owner");
+    modifier requireContractOwner(address caller) {
+        require(caller == contractOwner, "Caller is not contract owner");
         _;
     }
 
@@ -84,7 +84,7 @@ contract FlightSuretyData {
      * When operational mode is disabled, all write transactions except for this one will fail
      */
 
-    function setOperatingStatus(bool mode) external requireContractOwner {
+    function setOperatingStatus(bool mode, address caller) external requireContractOwner(caller) {
         operational = mode;
     }
 
@@ -154,7 +154,7 @@ contract FlightSuretyData {
     }
 
     function authorizeCaller(address callerAddress) {
-        // implementation not required for project
+        // implementation not required for project. Needed to authorize flightSuretyApp, alternative to caller parameter at setOperatingStatus.
     }
 
     function isAirlineRegistered(address checkAddress) external view returns (bool) {

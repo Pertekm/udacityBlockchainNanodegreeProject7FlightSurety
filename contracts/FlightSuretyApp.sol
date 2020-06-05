@@ -51,7 +51,7 @@ contract FlightSuretyApp {
      */
     modifier requireIsOperational() {
         // Modify to call data contract's status
-        require(true, "Contract is currently not operational");
+        require(flightSuretyData.isOperational(), "Contract is currently not operational");
         _; // All modifiers require an "_" which indicates where the function body will be added
     }
 
@@ -93,8 +93,8 @@ contract FlightSuretyApp {
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
 
-    function isOperational() public pure returns (bool) {
-        return true; // Modify to call data contract's status
+    function isOperational() public view returns (bool) {
+        return flightSuretyData.isOperational();
     }
 
     /********************************************************************************************/
@@ -110,7 +110,7 @@ contract FlightSuretyApp {
         external
         returns (bool success, uint256 votes)
     {
-        flightSuretyData.registerAirline(newAirlineAddress, msg.sender); // keep origin sender, so it does not change to FlightSuretyApp
+        flightSuretyData.registerAirline(newAirlineAddress, msg.sender); // pass origin sender, so it does not change to FlightSuretyApp
 
         success = flightSuretyData.isAirlineRegistered(newAirlineAddress);
 
@@ -169,6 +169,10 @@ contract FlightSuretyApp {
         });
 
         emit OracleRequest(index, airline, flight, timestamp);
+    }
+
+    function setOperatingStatus(bool mode) external {
+        flightSuretyData.setOperatingStatus(mode, msg.sender); // pass origin sender, so it does not change to FlightSuretyApp
     }
 
     // ###################################################################
@@ -357,4 +361,8 @@ contract FlightSuretyDataInterface {
         string flight,
         uint256 timestamp
     ) external payable;
+
+    function isOperational() public view returns (bool);
+
+    function setOperatingStatus(bool mode, address caller) external;
 }
