@@ -79,14 +79,59 @@ contract('Flight Surety Tests', async (accounts) => {
 
   });
 
+  it(`(multiparty) existing airline may register a new airline until there are at least four airlines registered, so no fifth allowed`, async function () {
+
+    let airlineNr2 = accounts[2];
+    let airlineNr3 = accounts[3];
+    let airlineNr4 = accounts[4];
+    let airlineNr5 = accounts[5];
+
+    // second
+    let airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr2);
+    assert.equal(airlineIsRegistered, false, "Airline should not yet be registered");
+
+    await config.flightSuretyApp.registerAirline(airlineNr2, { from: config.firstAirline });
+    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr2);
+    assert.equal(airlineIsRegistered, true, "Airline should be able to register second airline");
+
+    // third
+    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr3);
+    assert.equal(airlineIsRegistered, false, "Airline should not yet be registered");
+
+    await config.flightSuretyApp.registerAirline(airlineNr3, { from: config.firstAirline });
+    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr3);
+    assert.equal(airlineIsRegistered, true, "Airline should be able to register third airline");
+
+    // fourth
+    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr4);
+    assert.equal(airlineIsRegistered, false, "Airline should not yet be registered");
+
+    await config.flightSuretyApp.registerAirline(airlineNr4, { from: config.firstAirline });
+    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr4);
+    assert.equal(airlineIsRegistered, true, "Airline should be able to register fourth airline");
+
+    // fifth
+    try {
+      await config.flightSuretyApp.registerAirline(airlineNr5, { from: config.firstAirline });
+    }
+    catch (e) {
+      assert.isTrue(true, "revert exception required");
+    }
+
+    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr5);
+    assert.equal(airlineIsRegistered, false, "Airline should not be able to register fifth airline");
+
+  });
+
   it('(airline) cannot register an Airline using registerAirline() if it is not funded', async () => {
 
     // ARRANGE
-    let newAirline = accounts[2];
+    let airlineRegsiteredButNotFunded = accounts[2];
+    let newAirline = accounts[6];
 
     // ACT
     try {
-      await config.flightSuretyApp.registerAirline(newAirline, { from: config.firstAirline });
+      await config.flightSuretyApp.registerAirline(newAirline, { from: airlineRegsiteredButNotFunded });
     }
     catch (e) {
       assert.isTrue(true, "revert exception required");
@@ -98,6 +143,28 @@ contract('Flight Surety Tests', async (accounts) => {
 
   });
 
+  it('(airline) cannot register an new airline using registerAirline() if itself is not registered', async () => {
+
+    let notRegisteredAirline = accounts[7];
+    let registered = await config.flightSuretyApp.isAirline(notRegisteredAirline);
+    assert.isFalse(registered, "register airline should not be registered");
+
+    let newAirline = accounts[8];
+    registered = await config.flightSuretyApp.isAirline(newAirline);
+    assert.isFalse(registered, "new airline should not be registered");
+
+    try {
+      await config.flightSuretyApp.registerAirline(newAirline, { from: notRegisteredAirline });
+    }
+    catch (e) {
+      assert.isTrue(true, "revert exception required");
+    }
+    let result = await config.flightSuretyApp.isAirline.call(newAirline);
+
+    // ASSERT
+    assert.equal(result, false, "Airline should not be able to register another airline if itself is not registered");
+
+  });
 
   it('(owner) can register an Airline using registerAirline()', async () => {
 

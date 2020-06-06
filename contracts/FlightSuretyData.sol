@@ -18,6 +18,7 @@ contract FlightSuretyData {
     address private contractOwner; // Account used to deploy contract
     bool private operational = true; // Blocks all state changes throughout the contract if false
     mapping(address => AirlineStatus) airlineStatus;
+    uint registeredAirlineCount;
 
     struct Flight {
         bool isRegistered;
@@ -107,7 +108,16 @@ contract FlightSuretyData {
             "Fund required to register new Airline"
         );
 
+        if(registererAddress != contractOwner) {
+            require(registeredAirlineCount <= 4, "first airline can only register 4 new airlines (5 in sum)");
+        }
+
         airlineStatus[newAirlineAddress].isRegistered = true;
+        registeredAirlineCount++;
+
+        if(registererAddress == contractOwner) {
+            airlineStatus[newAirlineAddress].isFunded = true;
+        }
     }
 
     /**

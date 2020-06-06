@@ -77,10 +77,6 @@ contract FlightSuretyApp {
         flightSuretyData = FlightSuretyDataInterface(flightSuretyDataAddress);
 
         // Requirement: First airline is registered when contract is deployed. (cannot call this.registerAirline in constructor)
-        log1(
-            bytes32("first airline registered:"),
-            bytes32(firstAirline)
-        ); 
         flightSuretyData.registerAirline(firstAirline, msg.sender); // keep origin sender, so it does not change to FlightSuretyApp
 
         // predefined Flights (so no GUI is neccessary to define)

@@ -9,6 +9,9 @@ let web3 = new Web3(new Web3.providers.WebsocketProvider(config.url.replace('htt
 web3.eth.defaultAccount = web3.eth.accounts[0];
 let flightSuretyApp = new web3.eth.Contract(FlightSuretyApp.abi, config.appAddress);
 
+// ToDo: Oracle Initialization
+//       Upon startup, 20+ oracles are registered and their assigned indexes are persisted in memory
+//       use flightSuretyApp.registerOracle
 
 flightSuretyApp.events.OracleRequest({
     fromBlock: 0
@@ -16,7 +19,9 @@ flightSuretyApp.events.OracleRequest({
     console.log("OracleRequest: ")
     if (error) console.log("error: " + error)
     console.log(event)
-    // ToDo Logik: Oracle Register, Update State, Oracle Answer (flight is late or not) by push transaction to flight contract
+
+    // ToDo Logik: Update State, Oracle Answer (flight is late or not) by push transaction to flight contract
+    
 });
 
 const app = express();
