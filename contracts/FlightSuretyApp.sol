@@ -171,6 +171,18 @@ contract FlightSuretyApp {
         flightSuretyData.setOperatingStatus(mode, msg.sender); // pass origin sender, so it does not change to FlightSuretyApp
     }
 
+    function getVotesForAirline(address airline) external view returns (uint) {
+        return flightSuretyData.getVotesForAirline(airline);
+    }
+
+    function voteForAirline(address airline) external {
+        flightSuretyData.voteForAirline(airline, msg.sender); // pass origin sender, so it does not change to FlightSuretyApp
+    }
+
+    function payFundForAirline() external payable {
+        flightSuretyData.payFundForAirline.value(msg.value)(msg.sender); // pass origin sender, so it does not change to FlightSuretyApp
+    }
+
     // ###################################################################
     // region ORACLE MANAGEMENT
 
@@ -361,4 +373,10 @@ contract FlightSuretyDataInterface {
     function isOperational() public view returns (bool);
 
     function setOperatingStatus(bool mode, address caller) external;
+
+    function getVotesForAirline(address airline) external view returns (uint);
+    
+    function payFundForAirline(address airline) external payable;
+
+    function voteForAirline(address airline, address airlineVoter) external;
 }

@@ -78,44 +78,82 @@ contract('Flight Surety Tests', async (accounts) => {
     await config.flightSuretyApp.setOperatingStatus(true);
 
   });
+  
+  it('(airline) cannot vote for other airline that it should be registered if it hasnot paid fund', async () => {
+
+    let airlineNotRegistered = accounts[10];
+    let airlineRegisteredButNotFunded = accounts[12];
+
+    await config.flightSuretyApp.registerAirline(airlineRegisteredButNotFunded, { from: config.firstAirline });
+    let airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineRegisteredButNotFunded);
+    assert.isTrue(airlineIsRegistered, "Airline should be registered");
+    
+    let votesBefore = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
+    try {
+      await config.flightSuretyApp.voteForAirline(airlineNotRegistered, { from: airlineRegisteredButNotFunded });
+    }
+    catch (e) {
+      assert.isTrue(true, "revert exception required");
+    }
+    let votesAfter = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
+    assert.equal(votesAfter.toNumber(), votesBefore.toNumber(), "Votes incremented");
+
+  });
+
+  it('(multiparty) If votes for a new airline > 50% of the number of registered airlines, then the new airline is registered', async () => {
+    // Multiparty Consensus: Registration of fifth and subsequent airlines requires multi-party consensus of 50% of registered airlines
+
+    let airlineNotRegistered = accounts[11];
+    let airlineRegisteredAndFunded1 = accounts[12];
+    let airlineRegisteredAndFunded2 = accounts[13];
+    
+    // First vote: by airline 1
+    //await config.flightSuretyApp.registerAirline(airlineRegisteredAndFunded1, { from: config.owner });
+    let airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineRegisteredAndFunded1);
+    assert.isTrue(airlineIsRegistered, "Airline should be registered");
+
+    await config.flightSuretyApp.payFundForAirline({ from: airlineRegisteredAndFunded1, value: 10 });
+    
+    let votesBefore = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
+    await config.flightSuretyApp.voteForAirline(airlineNotRegistered, { from: airlineRegisteredAndFunded1 });
+    let votesAfter = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
+    assert.equal(votesAfter.toNumber(), votesBefore.toNumber()+1, "Votes incremented");
+
+    // Second vote: by airline 2
+    await config.flightSuretyApp.registerAirline(airlineRegisteredAndFunded2, { from: config.owner });
+    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineRegisteredAndFunded2);
+    assert.isTrue(airlineIsRegistered, "Airline should be registered");
+
+    //await config.flightSuretyApp.payFundForAirline({ from: airlineRegisteredAndFunded2, value: 10 }); // not needed, because registered by owner
+    
+    votesBefore = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
+    await config.flightSuretyApp.voteForAirline(airlineNotRegistered, { from: airlineRegisteredAndFunded2 });
+    votesAfter = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
+    assert.equal(votesAfter.toNumber(), votesBefore.toNumber()+1, "Votes incremented");
+
+    // Third vote: anoter by airline 2
+    votesBefore = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
+    await config.flightSuretyApp.voteForAirline(airlineNotRegistered, { from: airlineRegisteredAndFunded2 });
+    votesAfter = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
+    assert.equal(votesAfter.toNumber(), votesBefore.toNumber()+1, "Votes incremented");
+
+    // After > 50% votes the airline is registered
+    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNotRegistered);
+    assert.isTrue(airlineIsRegistered, "Airline should be registered");
+  });
 
   it(`(multiparty) existing airline may register a new airline until there are at least four airlines registered, so no fifth allowed`, async function () {
 
-    let airlineNr2 = accounts[2];
-    let airlineNr3 = accounts[3];
-    let airlineNr4 = accounts[4];
-    let airlineNr5 = accounts[5];
+    let airlineNr5 = accounts[3];
 
-    // second
-    let airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr2);
-    assert.equal(airlineIsRegistered, false, "Airline should not yet be registered");
-
-    await config.flightSuretyApp.registerAirline(airlineNr2, { from: config.firstAirline });
-    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr2);
-    assert.equal(airlineIsRegistered, true, "Airline should be able to register second airline");
-
-    // third
-    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr3);
-    assert.equal(airlineIsRegistered, false, "Airline should not yet be registered");
-
-    await config.flightSuretyApp.registerAirline(airlineNr3, { from: config.firstAirline });
-    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr3);
-    assert.equal(airlineIsRegistered, true, "Airline should be able to register third airline");
-
-    // fourth
-    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr4);
-    assert.equal(airlineIsRegistered, false, "Airline should not yet be registered");
-
-    await config.flightSuretyApp.registerAirline(airlineNr4, { from: config.firstAirline });
-    airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr4);
-    assert.equal(airlineIsRegistered, true, "Airline should be able to register fourth airline");
+    // Note: another testcase has registered airline before, so here are not all four needed to register
 
     // fifth
     try {
       await config.flightSuretyApp.registerAirline(airlineNr5, { from: config.firstAirline });
     }
     catch (e) {
-      assert.isTrue(true, "revert exception required");
+      assert.isTrue(e.reason.includes("can only register 4"), "revert exception required");
     }
 
     airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineNr5);
@@ -123,7 +161,8 @@ contract('Flight Surety Tests', async (accounts) => {
 
   });
 
-  it('(airline) cannot register an Airline using registerAirline() if it is not funded', async () => {
+  it('(airline) cannot register another Airline if itself is not funded', async () => {
+    // Airline Ante: Airline can be registered, but does not participate in contract until it submits funding of 10 ether
 
     // ARRANGE
     let airlineRegsiteredButNotFunded = accounts[2];
@@ -218,5 +257,18 @@ contract('Flight Surety Tests', async (accounts) => {
     }
 
   });
+
+  it('(airline) can vote for other airline that it should be registered', async () => {
+
+    let airlineNotRegistered = accounts[9];
+
+    let votesBefore = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
+    await config.flightSuretyApp.voteForAirline(airlineNotRegistered, { from: config.firstAirline });
+    let votesAfter = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
+    assert.equal(votesAfter.toNumber(), votesBefore.toNumber()+1, "Votes not incremented");
+
+  });
+
+  // Todo: Weiter im Review ab Abschnitt Passengers
 
 });

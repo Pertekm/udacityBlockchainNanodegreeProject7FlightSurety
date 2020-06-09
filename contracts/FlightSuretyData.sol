@@ -19,6 +19,7 @@ contract FlightSuretyData {
     bool private operational = true; // Blocks all state changes throughout the contract if false
     mapping(address => AirlineStatus) airlineStatus;
     uint registeredAirlineCount;
+    mapping(address => uint) airlineVotes; // Number of Votes for an airline that is should be registered
 
     struct Flight {
         bool isRegistered;
@@ -111,6 +112,7 @@ contract FlightSuretyData {
         if(registererAddress != contractOwner) {
             require(registeredAirlineCount <= 4, "first airline can only register 4 new airlines (5 in sum)");
         }
+        // Testfall reihenfolge ändern oder hier require genauer 
 
         airlineStatus[newAirlineAddress].isRegistered = true;
         registeredAirlineCount++;
@@ -204,5 +206,28 @@ contract FlightSuretyData {
      */
     function() external payable {
         fund();
+    }
+
+    function getVotesForAirline(address airline) external view returns (uint) {
+        return airlineVotes[airline];
+    }
+
+    function voteForAirline(address airline, address airlineVoter) external {
+        require(airlineStatus[airlineVoter].isFunded, "Voter needs to pay fund");
+
+        airlineVotes[airline]++;
+
+        if(airlineVotes[airline] > registeredAirlineCount / 2) {
+            // more than 50% votes, so airline can be registered
+            airlineStatus[airline].isRegistered = true;
+            registeredAirlineCount++;
+        }
+    }
+
+    function payFundForAirline(address airline) external payable {
+        require(msg.value >= 10, "Fund to low (min. 10)");
+        require(airlineStatus[airline].isFunded == false, "Airline is already funded");
+
+        airlineStatus[airline].isFunded = true;
     }
 }
