@@ -226,10 +226,10 @@ contract('Flight Surety Tests', async (accounts) => {
     let flightId = config.flightSample.flightId;
     let timestamp = config.flightSample.timestamp;
     let passenger = accounts[4];
-    let minMoney = 2;
+    let minMoney = 1;
 
     // ACT
-    await config.flightSuretyApp.buyInsurance(airline, flightId, timestamp, { from: passenger, value: minMoney });
+    await config.flightSuretyApp.buyInsurance(airline, flightId, timestamp, { from: passenger, value: web3.utils.toWei(minMoney.toString(), "ether") });
 
     // ASSERT
     assert.equal(true, true, "bla bla");
@@ -243,17 +243,17 @@ contract('Flight Surety Tests', async (accounts) => {
     let flightId = config.flightSample.flightId;
     let timestamp = config.flightSample.timestamp;
     let passenger = accounts[4];
-    let tooLittleMoney = 1;
+    let tooLittleMoney = 0;
 
     // ACT
     try {
-      await config.flightSuretyApp.buyInsurance(airline, flightId, timestamp, { from: passenger, value: tooLittleMoney });
+      await config.flightSuretyApp.buyInsurance(airline, flightId, timestamp, { from: passenger, value: web3.utils.toWei(tooLittleMoney.toString(), "ether") });
       
       assert.equal(true, false, "Should not reach here because exception is expected");
     }
     catch (e) {
       // ASSERT
-      assert.equal(e.reason, "Not enough money given", "expect exception because of money needed");
+      assert.equal(e.reason, "Not enough money given, need more than zero", "expect exception because of money needed");
     }
 
   });
@@ -269,6 +269,6 @@ contract('Flight Surety Tests', async (accounts) => {
 
   });
 
-  // Todo: Weiter im Review ab Abschnitt Passengers
+  // Todo: Weiter im Review ab Passenger Payment - If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid
 
 });

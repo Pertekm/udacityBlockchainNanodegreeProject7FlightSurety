@@ -131,7 +131,8 @@ contract FlightSuretyData {
         string flightId,
         uint256 timestamp
     ) external payable requireIsOperational {
-        require(msg.value > 1, "Not enough money given");
+        require(msg.value > 0 ether, "Not enough money given, need more than zero");
+        require(msg.value <= 1 ether, "Too much money given, max. one Ether");
         require(this.isAirlineRegistered(airline), "Airline is not registered");
         require(
             this.isFlightRegistered(airline, flightId, timestamp),

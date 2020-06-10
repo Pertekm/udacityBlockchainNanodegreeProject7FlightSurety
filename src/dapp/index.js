@@ -18,9 +18,11 @@ import './flightsurety.css';
 
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
-            let flightId = DOM.elid('flight-id-status').value;
-            let airline = DOM.elid('airline-status').value;
-            let timestamp = DOM.elid('timestamp-status').value;
+            let flightArray = DOM.elid('flight-status').value.split(";");
+            
+            let flightId = flightArray[0]; //DOM.elid('flight-id-status').value;
+            let airline = flightArray[2]; //DOM.elid('airline-status').value;
+            let timestamp = flightArray[1]; //DOM.elid('timestamp-status').value;
 
             // Write transaction
             contract.fetchFlightStatus(flightId, airline, timestamp, (error, result) => {
@@ -38,13 +40,14 @@ import './flightsurety.css';
             });
         })
 
-        DOM.elid('airline-insurance').value = '0xf17f52151EbEF6C7334FAD080c5704D77216b732'; //contract.airlines[0]; first airline, see file migrations\2_deploy_contracts.js
-
         DOM.elid('purchase-insurance').addEventListener('click', () => {
-            let flightId = DOM.elid('flight-id-insurance').value;
-            let airline = DOM.elid('airline-insurance').value;
-            let timestamp = DOM.elid('timestamp-insurance').value;
-            let money = DOM.elid('money-insurance').value;
+            let flightArray = DOM.elid('flight-insurance').value.split(";");
+
+            let flightId = flightArray[0]; 
+            let airline = flightArray[2]; 
+            let timestamp = flightArray[1];
+
+            let money = DOM.elid('money-insurance').value;   
 
             // Write transaction
             contract.buyInsurance(flightId, airline, timestamp, money, (error, result) => {

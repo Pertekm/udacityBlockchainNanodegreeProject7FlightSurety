@@ -81,8 +81,13 @@ contract FlightSuretyApp {
 
         // predefined Flights (so no GUI is neccessary to define)
         flightSuretyData.registerFlight(firstAirline, "F1", 1591128835); // 06/02/2020 @ 8:13pm (UTC)
-        flightSuretyData.registerFlight(firstAirline, "F2", now + 1 days);
-        flightSuretyData.registerFlight(firstAirline, "F3", now + 3 days);
+        require(flightSuretyData.isFlightRegistered(firstAirline, "F1", 1591128835), "Flight could not be registered");
+
+        flightSuretyData.registerFlight(firstAirline, "F2", 1591229835); // 06/04/2020 @ 12:17am (UTC)
+        require(flightSuretyData.isFlightRegistered(firstAirline, "F2", 1591229835), "Flight could not be registered");
+
+        flightSuretyData.registerFlight(firstAirline, "F3", 1591359935); // 06/05/2020 @ 12:25pm (UTC)
+        require(flightSuretyData.isFlightRegistered(firstAirline, "F3", 1591359935), "Flight could not be registered");
     }
     
     /********************************************************************************************/
@@ -359,6 +364,12 @@ contract FlightSuretyDataInterface {
     ) external;
 
     function registerFlight(address airline, string flightId, uint256 timestamp) external;
+
+    function isFlightRegistered(
+        address airline,
+        string flightId,
+        uint256 timestamp
+    ) external view returns (bool);
 
     function isAirlineRegistered(address checkAddress) external view returns (bool);
 
