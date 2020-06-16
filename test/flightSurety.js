@@ -232,7 +232,7 @@ contract('Flight Surety Tests', async (accounts) => {
     await config.flightSuretyApp.buyInsurance(airline, flightId, timestamp, { from: passenger, value: web3.utils.toWei(minMoney.toString(), "ether") });
 
     // ASSERT
-    assert.equal(true, true, "bla bla");
+    assert.equal(true, true, "Should reach here because no exception is expected");
 
   });
 
@@ -269,6 +269,28 @@ contract('Flight Surety Tests', async (accounts) => {
 
   });
 
-  // Todo: Weiter im Review ab Passenger Payment - If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid
+  it('(passenger) Withdraw: Passenger can withdraw any funds owed to them as a result of receiving credit for insurance payout', async () => {
+
+    // ARRANGE
+    let airline = config.flightSample.airline;
+    let flightId = config.flightSample.flightId;
+    let timestamp = config.flightSample.timestamp;
+    let passenger = accounts[4];
+    
+    // ACT
+    let beforeBalance = await web3.eth.getBalance(passenger);
+    await config.flightSuretyApp.withdrawInsurance(airline, flightId, timestamp, { from: passenger });
+    let afterBalance = await web3.eth.getBalance(passenger);
+
+    // ASSERT
+    assert.isTrue(afterBalance > beforeBalance, "Withdraw amount expected in balance");
+
+  });
+
+  // ToDo: GUI für vorherige Funktion
+
+  // Todo: Weiter im Review ab Passenger RePayment - If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid
+  // -> Auszahlung passiert nicht aktiv durch Passenger, sondern durch Oracle welches den Status "Late Airline (20)" meldet.
+  // Dabei beachten: Insurance Payouts - Insurance payouts are not sent directly to passenger’s wallet
 
 });

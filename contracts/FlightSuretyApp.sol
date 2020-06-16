@@ -129,7 +129,7 @@ contract FlightSuretyApp {
         string flight,
         uint256 timestamp
     ) external payable {
-        flightSuretyData.buyInsurance.value(msg.value)(airline, flight, timestamp); // pass origin value
+        flightSuretyData.buyInsurance.value(msg.value)(airline, flight, timestamp, msg.sender); // pass origin value. pass origin sender, so it does not change to FlightSuretyApp
     }
 
     /**
@@ -186,6 +186,14 @@ contract FlightSuretyApp {
 
     function payFundForAirline() external payable {
         flightSuretyData.payFundForAirline.value(msg.value)(msg.sender); // pass origin sender, so it does not change to FlightSuretyApp
+    }
+
+    function withdrawInsurance(
+        address airline,
+        string flight,
+        uint256 timestamp
+    ) external payable {
+        flightSuretyData.withdrawInsurance(airline, flight, timestamp, msg.sender); // pass origin sender, so it does not change to FlightSuretyApp
     }
 
     // ###################################################################
@@ -378,7 +386,15 @@ contract FlightSuretyDataInterface {
     function buyInsurance(
         address airline,
         string flight,
-        uint256 timestamp
+        uint256 timestamp,
+        address passenger
+    ) external payable;
+
+    function withdrawInsurance(
+        address airline,
+        string flight,
+        uint256 timestamp,
+        address passenger
     ) external payable;
 
     function isOperational() public view returns (bool);

@@ -26,6 +26,7 @@ contract FlightSuretyData {
         uint8 statusCode;
         uint256 updatedTimestamp;
         address airline;
+        mapping(address => uint) insuranceByPassenger;
     }
     mapping(bytes32 => Flight) private flights;
 
@@ -129,7 +130,8 @@ contract FlightSuretyData {
     function buyInsurance(
         address airline,
         string flightId,
-        uint256 timestamp
+        uint256 timestamp,
+        address passenger
     ) external payable requireIsOperational {
         require(msg.value > 0 ether, "Not enough money given, need more than zero");
         require(msg.value <= 1 ether, "Too much money given, max. one Ether");
@@ -138,6 +140,37 @@ contract FlightSuretyData {
             this.isFlightRegistered(airline, flightId, timestamp),
             "Flight is not registered"
         );
+
+        bytes32 flightKey = getFlightKey(airline, flightId, timestamp);
+
+        flights[flightKey].insuranceByPassenger[passenger] += msg.value;
+    }
+
+    /**
+     * @dev Withdraw insurance for a flight
+     *
+     */
+    function withdrawInsurance(
+        address airline,
+        string flightId,
+        uint256 timestamp,
+        address passenger
+    ) external payable requireIsOperational {
+        require(this.isAirlineRegistered(airline), "Airline is not registered");
+        require(
+            this.isFlightRegistered(airline, flightId, timestamp),
+            "Flight is not registered"
+        );
+
+        bytes32 flightKey = getFlightKey(airline, flightId, timestamp);
+
+        uint payout = flights[flightKey].insuranceByPassenger[passenger];
+
+        require(payout > 0,"No insurance available");
+
+        flights[flightKey].insuranceByPassenger[passenger] = 0;
+
+        passenger.transfer(payout);
     }
 
     /**
