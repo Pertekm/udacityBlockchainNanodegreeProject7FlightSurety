@@ -43,9 +43,9 @@ export default class Contract {
     fetchFlightStatus(flightId, airline, timestamp, callback) {
         let self = this;
         let payload = {
-            airline: airline, //self.airlines[0],
+            airline: airline, 
             flightId: flightId,
-            timestamp: timestamp //Math.floor(Date.now() / 1000)
+            timestamp: timestamp 
         } 
         self.flightSuretyApp.methods
             .fetchFlightStatus(payload.airline, payload.flightId, payload.timestamp)
@@ -57,13 +57,27 @@ export default class Contract {
     buyInsurance(flightId, airline, timestamp, money, callback) {
         let self = this;
         let payload = {
-            airline: airline, //self.airlines[0],
+            airline: airline, 
             flightId: flightId,
-            timestamp: timestamp //Math.floor(Date.now() / 1000)
+            timestamp: timestamp 
         } 
         self.flightSuretyApp.methods
             .buyInsurance(payload.airline, payload.flightId, payload.timestamp)
-            .send({ from: self.owner, value: money}, (error, result) => {
+            .send({ from: self.passengers[0], value: money}, (error, result) => {
+                callback(error, payload);
+            });
+    }
+
+    withdrawInsurance(flightId, airline, timestamp, callback) {
+        let self = this;
+        let payload = {
+            airline: airline, 
+            flightId: flightId,
+            timestamp: timestamp 
+        } 
+        self.flightSuretyApp.methods
+            .withdrawInsurance(payload.airline, payload.flightId, payload.timestamp)
+            .send({ from: self.passengers[0] }, (error, result) => {
                 callback(error, payload);
             });
     }

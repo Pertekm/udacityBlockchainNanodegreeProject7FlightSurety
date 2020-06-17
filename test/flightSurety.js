@@ -287,8 +287,6 @@ contract('Flight Surety Tests', async (accounts) => {
 
   });
 
-  // ToDo: GUI für vorherige Funktion
-
   // Todo: Weiter im Review ab Passenger RePayment - If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid
   // -> Auszahlung passiert nicht aktiv durch Passenger, sondern durch Oracle welches den Status "Late Airline (20)" meldet.
   // Dabei beachten: Insurance Payouts - Insurance payouts are not sent directly to passenger’s wallet

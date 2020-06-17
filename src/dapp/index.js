@@ -65,6 +65,29 @@ import './flightsurety.css';
             });
         })
 
+        DOM.elid('withdraw-insurance').addEventListener('click', () => {
+            let flightArray = DOM.elid('flight-insurance-withdraw').value.split(";");
+
+            let flightId = flightArray[0]; 
+            let airline = flightArray[2]; 
+            let timestamp = flightArray[1];
+
+            // Write transaction
+            contract.withdrawInsurance(flightId, airline, timestamp, (error, result) => {
+                if (!error) {
+                    display('Surety', 'Withdrawn insurance', [{
+                        label: 'Withdrawn insurance for flight ' + result.flightId + ', airline ' + result.airline + ', timestamp ' + result.timestamp,
+                        value: 'successfull'
+                    }]);
+                } else {
+                    display('Surety', 'Withdrawn insurance', [{
+                        label: 'Withdrawn insurance for flight ' + result.flightId + ', airline ' + result.airline + ', timestamp ' + result.timestamp,
+                        error: error
+                    }]);
+                }
+            });
+        })
+
     });
 
 
