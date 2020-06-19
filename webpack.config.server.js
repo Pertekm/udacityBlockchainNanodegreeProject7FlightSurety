@@ -5,6 +5,7 @@ const StartServerPlugin = require('start-server-webpack-plugin')
 
 module.exports = {
     entry: [
+        'babel-polyfill', // for async function https://knowledge.udacity.com/questions/138587
         'webpack/hot/poll?1000',
         './src/server/index'
     ],

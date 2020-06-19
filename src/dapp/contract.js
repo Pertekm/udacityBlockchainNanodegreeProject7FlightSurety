@@ -2,6 +2,8 @@ import FlightSuretyApp from '../../build/contracts/FlightSuretyApp.json';
 import Config from './config.json';
 import Web3 from 'web3';
 
+const GAS_LIMIT = 3000000;
+
 export default class Contract {
     constructor(network, callback) {
 
@@ -63,7 +65,7 @@ export default class Contract {
         } 
         self.flightSuretyApp.methods
             .buyInsurance(payload.airline, payload.flightId, payload.timestamp)
-            .send({ from: self.passengers[0], value: money}, (error, result) => {
+            .send({ from: self.passengers[0], value: money, gas: GAS_LIMIT }, (error, result) => {
                 callback(error, payload);
             });
     }

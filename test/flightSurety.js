@@ -108,7 +108,6 @@ contract('Flight Surety Tests', async (accounts) => {
     let airlineRegisteredAndFunded2 = accounts[13];
     
     // First vote: by airline 1
-    //await config.flightSuretyApp.registerAirline(airlineRegisteredAndFunded1, { from: config.owner });
     let airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineRegisteredAndFunded1);
     assert.isTrue(airlineIsRegistered, "Airline should be registered");
 
@@ -123,8 +122,6 @@ contract('Flight Surety Tests', async (accounts) => {
     await config.flightSuretyApp.registerAirline(airlineRegisteredAndFunded2, { from: config.owner });
     airlineIsRegistered = await config.flightSuretyApp.isAirline.call(airlineRegisteredAndFunded2);
     assert.isTrue(airlineIsRegistered, "Airline should be registered");
-
-    //await config.flightSuretyApp.payFundForAirline({ from: airlineRegisteredAndFunded2, value: 10 }); // not needed, because registered by owner
     
     votesBefore = await config.flightSuretyApp.getVotesForAirline(airlineNotRegistered);
     await config.flightSuretyApp.voteForAirline(airlineNotRegistered, { from: airlineRegisteredAndFunded2 });
@@ -286,9 +283,5 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.isTrue(afterBalance > beforeBalance, "Withdraw amount expected in balance");
 
   });
-
-  // Todo: Weiter im Review ab Passenger RePayment - If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid
-  // -> Auszahlung passiert nicht aktiv durch Passenger, sondern durch Oracle welches den Status "Late Airline (20)" meldet.
-  // Dabei beachten: Insurance Payouts - Insurance payouts are not sent directly to passenger’s wallet
 
 });

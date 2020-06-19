@@ -89,7 +89,7 @@ contract FlightSuretyApp {
         flightSuretyData.registerFlight(firstAirline, "F3", 1591359935); // 06/05/2020 @ 12:25pm (UTC)
         require(flightSuretyData.isFlightRegistered(firstAirline, "F3", 1591359935), "Flight could not be registered");
     }
-    
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -109,15 +109,13 @@ contract FlightSuretyApp {
 
     function registerAirline(address newAirlineAddress)
         external
-        returns (bool success, uint256 votes)
+        returns (bool success)
     {
         flightSuretyData.registerAirline(newAirlineAddress, msg.sender); // pass origin sender, so it does not change to FlightSuretyApp
 
         success = flightSuretyData.isAirlineRegistered(newAirlineAddress);
 
-        //votes = flightSuretyData.getAirlineVotes(newAirlineAddress);
-
-        return (success, votes);
+        return success;
     }
 
     function isAirline(address checkAddress) external view returns (bool) {
@@ -129,28 +127,35 @@ contract FlightSuretyApp {
         string flight,
         uint256 timestamp
     ) external payable {
-        flightSuretyData.buyInsurance.value(msg.value)(airline, flight, timestamp, msg.sender); // pass origin value. pass origin sender, so it does not change to FlightSuretyApp
+        // pass origin value. pass origin sender, so it does not change to FlightSuretyApp
+        flightSuretyData.buyInsurance.value(msg.value)(airline, flight, timestamp, msg.sender);
     }
 
     /**
      * @dev Register a future flight for insuring.
      *
      */
+    // not needed for project requirements, because only internal registration
+    /*
     function registerFlight() external pure {
-        // not needed for requirements
     }
+    */
 
     /**
      * @dev Called after oracle has updated flight status
      *
      */
-
     function processFlightStatus(
         address airline,
         string memory flight,
         uint256 timestamp,
         uint8 statusCode
-    ) internal pure {}
+    ) internal {
+        if(statusCode == STATUS_CODE_LATE_AIRLINE) {
+            // passenger receives credit
+            flightSuretyData.repayPassengerForFlight(airline, flight, timestamp);
+        }
+    }
 
     // Generate a request for oracles to fetch flight information
     function fetchFlightStatus(
@@ -193,7 +198,27 @@ contract FlightSuretyApp {
         string flight,
         uint256 timestamp
     ) external payable {
-        flightSuretyData.withdrawInsurance(airline, flight, timestamp, msg.sender); // pass origin sender, so it does not change to FlightSuretyApp
+        // pass origin sender, so it does not change to FlightSuretyApp
+        flightSuretyData.withdrawInsurance(airline, flight, timestamp, msg.sender);
+    }
+
+    // ########################################################################
+    // helper functions
+    function toAsciiString(address x) internal pure returns (string) {
+        bytes memory s = new bytes(40);
+        for (uint i = 0; i < 20; i++) {
+            byte b = byte(uint8(uint(x) / (2**(8*(19 - i)))));
+            byte hi = byte(uint8(b) / 16);
+            byte lo = byte(uint8(b) - 16 * uint8(hi));
+            s[2*i] = char(hi);
+            s[2*i+1] = char(lo);
+        }
+        return string(s);
+    }
+
+    function char(byte b) internal pure returns (byte c) {
+        if (uint8(b) < 10) return byte(uint8(b) + 0x30);
+        else return byte(uint8(b) + 0x57);
     }
 
     // ###################################################################
@@ -397,12 +422,16 @@ contract FlightSuretyDataInterface {
         address passenger
     ) external payable;
 
+    function repayPassengerForFlight(address airline,
+        string flight,
+        uint256 timestamp) external payable;
+
     function isOperational() public view returns (bool);
 
     function setOperatingStatus(bool mode, address caller) external;
 
     function getVotesForAirline(address airline) external view returns (uint);
-    
+
     function payFundForAirline(address airline) external payable;
 
     function voteForAirline(address airline, address airlineVoter) external;

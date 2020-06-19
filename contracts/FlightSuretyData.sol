@@ -2,7 +2,6 @@ pragma solidity ^0.4.25;
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-
 contract FlightSuretyData {
     using SafeMath for uint256;
 
@@ -18,15 +17,16 @@ contract FlightSuretyData {
     address private contractOwner; // Account used to deploy contract
     bool private operational = true; // Blocks all state changes throughout the contract if false
     mapping(address => AirlineStatus) airlineStatus;
-    uint registeredAirlineCount;
-    mapping(address => uint) airlineVotes; // Number of Votes for an airline that is should be registered
+    uint256 registeredAirlineCount;
+    mapping(address => uint256) airlineVotes; // Number of Votes for an airline that is should be registered
 
     struct Flight {
         bool isRegistered;
         uint8 statusCode;
         uint256 updatedTimestamp;
         address airline;
-        mapping(address => uint) insuranceByPassenger;
+        address[] passenger;
+        mapping(address => uint256) insuranceByPassenger;
     }
     mapping(bytes32 => Flight) private flights;
 
@@ -87,7 +87,10 @@ contract FlightSuretyData {
      * When operational mode is disabled, all write transactions except for this one will fail
      */
 
-    function setOperatingStatus(bool mode, address caller) external requireContractOwner(caller) {
+    function setOperatingStatus(bool mode, address caller)
+        external
+        requireContractOwner(caller)
+    {
         operational = mode;
     }
 
@@ -110,15 +113,17 @@ contract FlightSuretyData {
             "Fund required to register new Airline"
         );
 
-        if(registererAddress != contractOwner) {
-            require(registeredAirlineCount <= 4, "first airline can only register 4 new airlines (5 in sum)");
+        if (registererAddress != contractOwner) {
+            require(
+                registeredAirlineCount <= 4,
+                "first airline can only register 4 new airlines (5 in sum)"
+            );
         }
-        // Testfall reihenfolge ändern oder hier require genauer 
 
         airlineStatus[newAirlineAddress].isRegistered = true;
         registeredAirlineCount++;
 
-        if(registererAddress == contractOwner) {
+        if (registererAddress == contractOwner) {
             airlineStatus[newAirlineAddress].isFunded = true;
         }
     }
@@ -133,7 +138,10 @@ contract FlightSuretyData {
         uint256 timestamp,
         address passenger
     ) external payable requireIsOperational {
-        require(msg.value > 0 ether, "Not enough money given, need more than zero");
+        require(
+            msg.value > 0 ether,
+            "Not enough money given, need more than zero"
+        );
         require(msg.value <= 1 ether, "Too much money given, max. one Ether");
         require(this.isAirlineRegistered(airline), "Airline is not registered");
         require(
@@ -143,6 +151,7 @@ contract FlightSuretyData {
 
         bytes32 flightKey = getFlightKey(airline, flightId, timestamp);
 
+        flights[flightKey].passenger.push(passenger);
         flights[flightKey].insuranceByPassenger[passenger] += msg.value;
     }
 
@@ -164,32 +173,65 @@ contract FlightSuretyData {
 
         bytes32 flightKey = getFlightKey(airline, flightId, timestamp);
 
-        uint payout = flights[flightKey].insuranceByPassenger[passenger];
+        uint256 payout = flights[flightKey].insuranceByPassenger[passenger];
 
-        require(payout > 0,"No insurance available");
+        require(payout > 0, "No insurance available");
 
         flights[flightKey].insuranceByPassenger[passenger] = 0;
 
         passenger.transfer(payout);
     }
 
+    function repayPassengerForFlight(
+        address airline,
+        string flightId,
+        uint256 timestamp
+    ) external payable {
+        require(this.isAirlineRegistered(airline), "Airline is not registered");
+        require(
+            this.isFlightRegistered(airline, flightId, timestamp),
+            "Flight is not registered"
+        );
+
+        bytes32 flightKey = getFlightKey(airline, flightId, timestamp);
+
+        uint256 passengerCount = flights[flightKey].passenger.length;
+
+        for (uint256 i = 0; i < passengerCount; i++) {
+            address passenger = flights[flightKey].passenger[i];
+            uint256 insurance = flights[flightKey]
+                .insuranceByPassenger[passenger];
+
+            if (insurance > 0) {
+                flights[flightKey].insuranceByPassenger[passenger] = 0;
+
+                // passenger receives credit of 1.5X the amount they paid: multiply with decimal not possible, so add the half.
+                uint256 payout = SafeMath.add(insurance, SafeMath.div(insurance, 2));
+                passenger.transfer(payout);
+            }
+        }
+    }
+
     /**
      *  @dev Credits payouts to insurees
      */
-    function creditInsurees() external requireIsOperational {}
+    // not needed for project requirements, solved with other function
+    //function creditInsurees() external requireIsOperational {}
 
     /**
      *  @dev Transfers eligible payout funds to insuree
      *
      */
-    function pay() external requireIsOperational {}
+     // not needed for project requirements, solved with other function
+    //function pay() external requireIsOperational {}
 
     /**
      * @dev Initial funding for the insurance. Unless there are too many delayed flights
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund() public payable requireIsOperational {}
+     // not needed for project requirements, solved with other function
+    //function fund() public payable requireIsOperational {}
 
     function getFlightKey(
         address airline,
@@ -200,10 +242,15 @@ contract FlightSuretyData {
     }
 
     function authorizeCaller(address callerAddress) {
-        // implementation not required for project. Needed to authorize flightSuretyApp, alternative to caller parameter at setOperatingStatus.
+        // empty because implementation not required for project.
+        // Would be needed to authorize flightSuretyApp, alternative to caller parameter at setOperatingStatus.
     }
 
-    function isAirlineRegistered(address checkAddress) external view returns (bool) {
+    function isAirlineRegistered(address checkAddress)
+        external
+        view
+        returns (bool)
+    {
         return airlineStatus[checkAddress].isRegistered;
     }
 
@@ -239,19 +286,26 @@ contract FlightSuretyData {
      *
      */
     function() external payable {
-        fund();
+        //fund();
     }
 
-    function getVotesForAirline(address airline) external view returns (uint) {
+    function getVotesForAirline(address airline)
+        external
+        view
+        returns (uint256)
+    {
         return airlineVotes[airline];
     }
 
     function voteForAirline(address airline, address airlineVoter) external {
-        require(airlineStatus[airlineVoter].isFunded, "Voter needs to pay fund");
+        require(
+            airlineStatus[airlineVoter].isFunded,
+            "Voter needs to pay fund"
+        );
 
         airlineVotes[airline]++;
 
-        if(airlineVotes[airline] > registeredAirlineCount / 2) {
+        if (airlineVotes[airline] > registeredAirlineCount / 2) {
             // more than 50% votes, so airline can be registered
             airlineStatus[airline].isRegistered = true;
             registeredAirlineCount++;
@@ -260,7 +314,10 @@ contract FlightSuretyData {
 
     function payFundForAirline(address airline) external payable {
         require(msg.value >= 10, "Fund to low (min. 10)");
-        require(airlineStatus[airline].isFunded == false, "Airline is already funded");
+        require(
+            airlineStatus[airline].isFunded == false,
+            "Airline is already funded"
+        );
 
         airlineStatus[airline].isFunded = true;
     }

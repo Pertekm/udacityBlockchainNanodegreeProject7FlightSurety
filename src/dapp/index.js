@@ -20,9 +20,9 @@ import './flightsurety.css';
         DOM.elid('submit-oracle').addEventListener('click', () => {
             let flightArray = DOM.elid('flight-status').value.split(";");
             
-            let flightId = flightArray[0]; //DOM.elid('flight-id-status').value;
-            let airline = flightArray[2]; //DOM.elid('airline-status').value;
-            let timestamp = flightArray[1]; //DOM.elid('timestamp-status').value;
+            let flightId = flightArray[0];  
+            let airline = flightArray[2];   
+            let timestamp = flightArray[1]; 
 
             // Write transaction
             contract.fetchFlightStatus(flightId, airline, timestamp, (error, result) => {
@@ -112,10 +112,3 @@ function display(title, description, results) {
     displayDiv.append(section);
 
 }
-
-
-
-
-
-
-
