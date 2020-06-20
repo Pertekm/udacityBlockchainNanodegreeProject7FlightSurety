@@ -18,8 +18,6 @@ To run truffle tests:
 
 `truffle test ./test/flightSurety.js`
 
-`truffle test ./test/oracles.js`
-
 To use the dapp:
 
 `truffle migrate`
@@ -28,13 +26,18 @@ To use the dapp:
 
 To view dapp:
 
-`http://localhost:8000`
+http://localhost:8000
+
+![dapp gui screenshot](dapp-gui.png)
 
 ## Develop Server
 
-`npm run server`
+To run truffle tests:
 
 `truffle test ./test/oracles.js`
+
+To use the server:
+`npm run server`
 
 ## Deploy
 
