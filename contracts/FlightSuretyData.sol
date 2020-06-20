@@ -186,7 +186,7 @@ contract FlightSuretyData {
         address airline,
         string flightId,
         uint256 timestamp
-    ) external payable {
+    ) external payable requireIsOperational {
         require(this.isAirlineRegistered(airline), "Airline is not registered");
         require(
             this.isFlightRegistered(airline, flightId, timestamp),
@@ -258,7 +258,7 @@ contract FlightSuretyData {
         address airline,
         string flightId,
         uint256 timestamp
-    ) external {
+    ) external requireIsOperational {
         Flight memory flight;
 
         flight.isRegistered = true;
@@ -297,7 +297,7 @@ contract FlightSuretyData {
         return airlineVotes[airline];
     }
 
-    function voteForAirline(address airline, address airlineVoter) external {
+    function voteForAirline(address airline, address airlineVoter) external requireIsOperational {
         require(
             airlineStatus[airlineVoter].isFunded,
             "Voter needs to pay fund"
@@ -312,7 +312,7 @@ contract FlightSuretyData {
         }
     }
 
-    function payFundForAirline(address airline) external payable {
+    function payFundForAirline(address airline) external payable requireIsOperational {
         require(msg.value >= 10, "Fund to low (min. 10)");
         require(
             airlineStatus[airline].isFunded == false,
